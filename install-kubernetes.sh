@@ -2,7 +2,7 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
-sudo apt-get remove needrestart
+sudo apt-get remove -y needrestart
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl git vim haproxy open-iscsi
 curl -fsSLo containerd-config.toml https://gist.githubusercontent.com/oradwell/31ef858de3ca43addef68ff971f459c2/raw/5099df007eb717a11825c3890a0517892fa12dbf/containerd-config.toml
