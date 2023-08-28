@@ -97,7 +97,7 @@ for interface in $interface_names; do
     hex_ip=$(printf '%02X' $(echo $ip_address | tr '.' ' ') | tr 'A-F' 'a-f')
 done
 
-cat <<EOF | sudo tee $HOME/argocd-ingress.yaml
+cat <<EOF | tee $HOME/argocd-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -121,7 +121,7 @@ spec:
               name: https
 EOF
 
-cat <<EOF | sudo tee $HOME/argocd-cm.yaml
+cat <<EOF | tee $HOME/argocd-cm.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
