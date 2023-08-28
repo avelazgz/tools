@@ -1,7 +1,9 @@
 #!/bin/bash
 
-sudo apt update
-sudo apt install -y apt-transport-https ca-certificates curl git vim haproxy open-iscsi
+export NEEDRESTART_MODE=a
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl git vim haproxy open-iscsi
 curl -fsSLo containerd-config.toml https://gist.githubusercontent.com/oradwell/31ef858de3ca43addef68ff971f459c2/raw/5099df007eb717a11825c3890a0517892fa12dbf/containerd-config.toml
 sudo mkdir /etc/containerd
 sudo mv containerd-config.toml /etc/containerd/config.toml
@@ -36,8 +38,8 @@ sudo sysctl --system
 curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 # Add Kubernetes apt repository
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt update
-sudo apt install -y kubelet kubeadm kubectl
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 sudo swapon --show
 sudo swapoff -a
