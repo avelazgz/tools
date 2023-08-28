@@ -7,7 +7,7 @@ curl -fsSLo containerd-config.toml https://gist.githubusercontent.com/oradwell/3
 sudo mkdir /etc/containerd
 sudo mv containerd-config.toml /etc/containerd/config.toml
 wget https://github.com/containerd/containerd/releases/download/v1.7.3/containerd-1.7.3-linux-amd64.tar.gz
-#tar xvf containerd-1.7.3-linux-amd64.tar.gz
+tar xvf containerd-1.7.3-linux-amd64.tar.gz
 sudo tar Cxzvf /usr/local containerd-1.7.3-linux-amd64.tar.gz
 sudo curl -fsSLo /etc/systemd/system/containerd.service https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
 sudo systemctl daemon-reload
