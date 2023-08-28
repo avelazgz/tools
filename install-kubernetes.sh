@@ -137,4 +137,6 @@ kubectl apply -f argocd-ingress.yaml
 kubectl apply -f argocd-cm.yaml
 kubectl rollout restart deployment/argocd-server -n argocd
 
+argocd admin initial-password -n argocd
+
 echo -e "\n\n\nPuedes acceder a ArgoCD en la siguiente URL: https://argocd.$hex_ip.nip.io\n"
