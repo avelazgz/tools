@@ -97,7 +97,6 @@ for interface in $interface_names; do
     hex_ip=$(printf '%02X' $(echo $ip_address | tr '.' ' ') | tr 'A-F' 'a-f')
 done
 
-
 cat <<EOF | sudo tee $HOME/argocd-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -132,6 +131,7 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   server.insecure: "false"
+EOF
 
 kubectl apply -f argocd-ingress.yaml
 kubectl apply -f argocd-cm.yaml
