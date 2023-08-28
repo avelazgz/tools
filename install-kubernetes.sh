@@ -131,7 +131,7 @@ metadata:
     app.kubernetes.io/name: argocd-cmd-params-cm
     app.kubernetes.io/part-of: argocd
 data:
-  server.insecure: "false"
+  server.insecure: "true"
 EOF
 
 sleep 180
