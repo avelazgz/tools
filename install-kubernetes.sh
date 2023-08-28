@@ -133,6 +133,7 @@ data:
   server.insecure: "false"
 EOF
 
+sleep 30
 kubectl apply -f argocd-ingress.yaml
 kubectl apply -f argocd-cm.yaml
 kubectl rollout restart deployment/argocd-server -n argocd
