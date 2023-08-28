@@ -6,11 +6,11 @@ curl -fsSLo containerd-config.toml https://gist.githubusercontent.com/oradwell/3
 sudo mkdir /etc/containerd
 sudo mv containerd-config.toml /etc/containerd/config.toml
 wget https://github.com/containerd/containerd/releases/download/v1.7.3/containerd-1.7.3-linux-amd64.tar.gz
-tar xvf containerd-1.7.3-linux-amd64.tar.gz
-tar Cxzvf /usr/local containerd-1.7.3-linux-amd64.tar.gz
+#tar xvf containerd-1.7.3-linux-amd64.tar.gz
+sudo tar Cxzvf /usr/local containerd-1.7.3-linux-amd64.tar.gz
 sudo curl -fsSLo /etc/systemd/system/containerd.service https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
-systemctl daemon-reload
-systemctl enable --now containerd
+sudo systemctl daemon-reload
+sudo systemctl enable --now containerd
 curl -fsSLo runc.amd64 https://github.com/opencontainers/runc/releases/download/v1.1.9/runc.amd64
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 curl -fLo cni-plugins-linux-amd64-v1.1.2.tgz https://github.com/containernetworking/plugins/releases/download/v1.1.2/cni-plugins-linux-amd64-v1.1.2.tgz
@@ -36,20 +36,19 @@ sudo sysctl --system
 curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 # Add Kubernetes apt repository
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-apt update
-apt install -y kubelet kubeadm kubectl
-apt-mark hold kubelet kubeadm kubectl
-swapon --show
+sudo apt update
+sudo apt install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+sudo swapon --show
 sudo swapoff -a
 sudo sed -i -e '/swap/d' /etc/fstab
-kubeadm init --pod-network-cidr=10.244.0.0/16
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
-systemctl restart haproxy
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | sudo bash
 sudo systemctl enable --now iscsid
 helm repo add openebs https://openebs.github.io/charts
 kubectl create namespace openebs
@@ -60,3 +59,44 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
+export NODE_PORT_HTTP="$(kubectl get service/ingress-nginx-controller -n ingress-nginx -o go-template='{{(index .spec.ports 0).nodePort}}')"
+export NODE_PORT_HTTPS="$(kubectl get service/ingress-nginx-controller -n ingress-nginx -o go-template='{{(index .spec.ports 1).nodePort}}')"
+
+cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg
+global
+        log /dev/log    local0
+        log /dev/log    local1 notice
+        chroot /var/lib/haproxy
+        stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+        stats timeout 30s
+        user haproxy
+        group haproxy
+        daemon
+
+defaults
+    mode tcp
+
+frontend front_http
+    bind :80
+    default_backend back_http
+
+backend back_http
+    server http1 localhost:$NODE_PORT_HTTP
+
+frontend front_https
+    bind :443
+    default_backend back_https
+
+backend back_https
+    server https1 localhost:$NODE_PORT_HTTPS
+EOF
+sudo systemctl restart haproxy
+
+interface_names=$(ip -o link show | awk -F': ' '$2 ~ /^ens/ {print $2}')
+
+for interface in $interface_names; do
+    ip_address=$(ip -o -4 addr show dev $interface | awk '{split($4, a, "/"); print a[1]}')
+    hex_ip=$(printf '%02X' $(echo $ip_address | tr '.' ' ') | tr 'A-F' 'a-f')
+done
+
+echo "\n\n\nPuedes llamar al ingress de este servidor mediante http://X.$hex_ip.nip.io\n"
