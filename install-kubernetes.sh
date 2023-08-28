@@ -97,4 +97,44 @@ for interface in $interface_names; do
     hex_ip=$(printf '%02X' $(echo $ip_address | tr '.' ' ') | tr 'A-F' 'a-f')
 done
 
-echo -e "\n\n\nPuedes llamar al ingress de este servidor mediante http://X.$hex_ip.nip.io\n"
+
+cat <<EOF | sudo tee $HOME/argocd-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: argocd.$hex_ip.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              name: https
+EOF
+
+cat <<EOF | sudo tee $HOME/argocd-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  server.insecure: "false"
+
+kubectl apply -f argocd-ingress.yaml
+kubectl apply -f argocd-cm.yaml
+kubectl rollout restart deployment/argocd-server -n argocd
+
+echo -e "\n\n\nPuedes acceder a ArgoCD en la siguiente URL: https://argocd.$hex_ip.nip.io\n"
