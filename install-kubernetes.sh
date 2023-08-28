@@ -14,9 +14,6 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now containerd
 curl -fsSLo runc.amd64 https://github.com/opencontainers/runc/releases/download/v1.1.9/runc.amd64
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
-curl -fLo cni-plugins-linux-amd64-v1.1.2.tgz https://github.com/containernetworking/plugins/releases/download/v1.1.2/cni-plugins-linux-amd64-v1.1.2.tgz
-sudo mkdir -p /opt/cni/bin
-sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.2.tgz
 curl -fLo cni-plugins-linux-amd64-v1.3.0.tgz https://github.com/containernetworking/plugins/releases/download/v1.3.0/cni-plugins-linux-amd64-v1.3.0.tgz
 sudo mkdir -p /opt/cni/bin
 sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.3.0.tgz
