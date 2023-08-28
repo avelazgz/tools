@@ -99,4 +99,4 @@ for interface in $interface_names; do
     hex_ip=$(printf '%02X' $(echo $ip_address | tr '.' ' ') | tr 'A-F' 'a-f')
 done
 
-echo "\n\n\nPuedes llamar al ingress de este servidor mediante http://X.$hex_ip.nip.io\n"
+echo -e "\n\n\nPuedes llamar al ingress de este servidor mediante http://X.$hex_ip.nip.io\n"
